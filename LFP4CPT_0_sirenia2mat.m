@@ -1,5 +1,7 @@
-% this is a exmple script for using the sireniatomat function... user will
-% need to have marked, or on hand, what mouse corresponds to what chamber
+% this is a exmple script for using the sireniatomat function...
+% - Written by SSA
+
+%user will need to have marked, or on hand, what mouse corresponds to what chamber 
 % for naming purposes...
 
 % for a 1st time user, this info can be found in the performance tracking
