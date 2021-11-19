@@ -3,7 +3,7 @@
 % structures for each mouse for each recorded session, structures
 % containing lfp combined with event TStamps
 
-%--Written by Suhaas S. Adiraju 10/05/2021
+%--Written by Suhaas S. Adiraju 10/05/2021 (updated 11.19.21)
 
 %% Load-in
 clear; clc;
@@ -15,7 +15,7 @@ path2struc = 'Z:\Circuits projects (CPT)\CPT Recording Data\LC-mPFC LFP';
 cd(path2struc); 
 
 % define then load desired data structure 
-filename = 'S3GOOD_1328_Chamber4';
+filename = 'S3GOOD_1328_S';
 load(filename);
 
 % create a list of the variables were working with for speed 
@@ -59,19 +59,19 @@ EEGtimevec = linspace(0, timeEeg, (length(lfp)));
 % think about it as EEGtimevec containing time in seconds within it, as
 % values, so we want 1800s or values up to and equal to 1800
 cpt_schLength = EEGtimevec(EEGtimevec <= 1800); 
-% 
+
 
 % because the vector of cpt_schLength was sourced from the time-vector scaled 
 % to the # of data points from the EEG recording, we want EEG data points = to the length of our 1800s vector
 lfp = lfp(:,[1:(length(cpt_schLength))]);
 
 %% Split LFP channels for clarity 
-% currently, our lfp variable contains all channels together, rows: 1-ground, 2-reference-pin, 3-Brain reg.1, 4-Brain reg.2
+% currently, our lfp variable contains all channels together, rows: 1-gint64, 2-reference-pin, 3-Brain reg.1, 4-Brain reg.2
 
 % For clarity, and to avoid mistakes, lets split them up and save them with
 % aptly named variables 
 
-%1- ground 
+%1- gint64 
 Ground.lfp = lfp(1,:); 
 %2- straigh pin, (ref. i think) 
 Reference.lfp = lfp(2,:);
@@ -88,31 +88,31 @@ ACC.lfp = lfp (4,:);
 
 % First, we must up-sample, to match the scale(resolution) we have lfp at
 FIRBeam_Onidx = FIRBeam_On * 2000; 
-FIRBeam_Onidx =round((FIRBeam_Onidx'),7); % here im rounding to the 7th digit, this was to fix an odd issue that was occurring
+FIRBeam_Onidx =int64(FIRBeam_Onidx); 
 
 FIRBeam_Offidx = FIRBeam_Off * 2000; 
-FIRBeam_Offidx = round((FIRBeam_Offidx'),7);
+FIRBeam_Offidx = int64(FIRBeam_Offidx);
 
 Center_ScTouchidx = Center_ScTouch * 2000; 
-Center_ScTouchidx = round((Center_ScTouchidx'),7);
+Center_ScTouchidx = int64(Center_ScTouchidx);
 
 Start_ITIidx =Start_ITI * 2000; 
-Start_ITIidx = round((Start_ITIidx'),7);
+Start_ITIidx = int64(Start_ITIidx);
 
 Stimulusidx = Stimulus * 2000; 
-Stimulusidx = round((Stimulusidx'),7);
+Stimulusidx = int64(Stimulusidx);
 
 Hitidx = Hit * 2000; 
-Hitidx = round((Hitidx'),7);
+Hitidx = int64(Hitidx);
 
 Missidx = Miss * 2000; 
-Missidx = round((Missidx'),7);
+Missidx = int64(Missidx);
 
 Correct_Rejidx =Correct_Rej * 2000; 
-Correct_Rejidx = round((Correct_Rejidx'),7);
+Correct_Rejidx = int64(Correct_Rejidx);
 
 False_Alarmidx = False_Alarm * 2000; 
-False_Alarmidx = round((False_Alarmidx'),7);
+False_Alarmidx = int64(False_Alarmidx);
  
 
 % now we can grab the lfp of each timestamp
@@ -122,94 +122,94 @@ False_Alarmidx = round((False_Alarmidx'),7);
 %errors
 if sum(size(FIRBeam_On)) >= 2 
     for i = 1:length(FIRBeam_Onidx)
-        if (FIRBeam_Onidx(i)+1000)<(length(lfp)) && (FIRBeam_Onidx(i)-1000)>(0)  
-            Ground.FIRBeam_On_lfp{i} = Ground.lfp(1,[FIRBeam_Onidx(1,i)-1000:FIRBeam_Onidx(1,i)+1000]);
-            Reference.FIRBeam_On_lfp{i} = Reference.lfp(1,[FIRBeam_Onidx(1,i)-1000:FIRBeam_Onidx(1,i)+1000]);
-            LC.FIRBeam_On_lfp{i} = LC.lfp(1,[FIRBeam_Onidx(1,i)-1000:FIRBeam_Onidx(1,i)+1000]);
-            ACC.FIRBeam_On_lfp{i} = ACC.lfp(1,[FIRBeam_Onidx(1,i)-1000:FIRBeam_Onidx(1,i)+1000]);
+        if (FIRBeam_Onidx(i)+(srate*2))<(length(lfp)) && (FIRBeam_Onidx(i)-(srate*2))>(0)  
+            Ground.FIRBeam_On_lfp{i} = Ground.lfp(1,[FIRBeam_Onidx(1,i)-(srate*2):FIRBeam_Onidx(1,i)+(srate*2)]);
+            Reference.FIRBeam_On_lfp{i} = Reference.lfp(1,[FIRBeam_Onidx(1,i)-(srate*2):FIRBeam_Onidx(1,i)+(srate*2)]);
+            LC.FIRBeam_On_lfp{i} = LC.lfp(1,[FIRBeam_Onidx(1,i)-(srate*2):FIRBeam_Onidx(1,i)+(srate*2)]);
+            ACC.FIRBeam_On_lfp{i} = ACC.lfp(1,[FIRBeam_Onidx(1,i)-(srate*2):FIRBeam_Onidx(1,i)+(srate*2)]);
         end
     end
 end
 
 if sum(size(FIRBeam_Off)) >= 2 
     for i = 1:(length(FIRBeam_Offidx))
-        if (FIRBeam_Offidx(i)+1000)<(length(lfp)) && (FIRBeam_Offidx(i)-1000)>(0)        
-            Ground.FIRBeam_Off_lfp{i} = Ground.lfp(1,[FIRBeam_Offidx(1,i)-1000:FIRBeam_Offidx(1,i)+1000]);
-            Reference.FIRBeam_Off_lfp{i} = Reference.lfp(1,[FIRBeam_Offidx(1,i)-1000:FIRBeam_Offidx(1,i)+1000]);
-            LC.FIRBeam_Off_lfp{i} = LC.lfp(1,[FIRBeam_Offidx(1,i)-1000:FIRBeam_Offidx(1,i)+1000]);
-            ACC.FIRBeam_Off_lfp{i} = ACC.lfp(1,[FIRBeam_Offidx(1,i)-1000:FIRBeam_Offidx(1,i)+1000]);
+        if (FIRBeam_Offidx(i)+(srate*2))<(length(lfp)) && (FIRBeam_Offidx(i)-(srate*2))>(0)        
+            Ground.FIRBeam_Off_lfp{i} = Ground.lfp(1,[FIRBeam_Offidx(1,i)-(srate*2):FIRBeam_Offidx(1,i)+(srate*2)]);
+            Reference.FIRBeam_Off_lfp{i} = Reference.lfp(1,[FIRBeam_Offidx(1,i)-(srate*2):FIRBeam_Offidx(1,i)+(srate*2)]);
+            LC.FIRBeam_Off_lfp{i} = LC.lfp(1,[FIRBeam_Offidx(1,i)-(srate*2):FIRBeam_Offidx(1,i)+(srate*2)]);
+            ACC.FIRBeam_Off_lfp{i} = ACC.lfp(1,[FIRBeam_Offidx(1,i)-(srate*2):FIRBeam_Offidx(1,i)+(srate*2)]);
         end
     end
 end
 
 if sum(size(Center_ScTouch)) >= 2 
     for i = 1:length(Center_ScTouchidx)
-        if (Center_ScTouchidx(i)+1000)<(length(lfp)) && (Center_ScTouchidx(i)-1000)>(0)              
-            Ground.Center_ScTouch_lfp{i} = Ground.lfp(1,[Center_ScTouchidx(1,i)-1000:Center_ScTouchidx(1,i)+1000]);
-            Reference.Center_ScTouch_lfp{i} = Reference.lfp(1,[Center_ScTouchidx(1,i)-1000:Center_ScTouchidx(1,i)+1000]);
-            LC.Center_ScTouch_lfp{i} = LC.lfp(1,[Center_ScTouchidx(1,i)-1000:Center_ScTouchidx(1,i)+1000]);
-            ACC.Center_ScTouch_lfp{i} = ACC.lfp(1,[Center_ScTouchidx(1,i)-1000:Center_ScTouchidx(1,i)+1000]);
+        if (Center_ScTouchidx(i)+(srate*2))<(length(lfp)) && (Center_ScTouchidx(i)-(srate*2))>(0)              
+            Ground.Center_ScTouch_lfp{i} = Ground.lfp(1,[Center_ScTouchidx(1,i)-(srate*2):Center_ScTouchidx(1,i)+(srate*2)]);
+            Reference.Center_ScTouch_lfp{i} = Reference.lfp(1,[Center_ScTouchidx(1,i)-(srate*2):Center_ScTouchidx(1,i)+(srate*2)]);
+            LC.Center_ScTouch_lfp{i} = LC.lfp(1,[Center_ScTouchidx(1,i)-(srate*2):Center_ScTouchidx(1,i)+(srate*2)]);
+            ACC.Center_ScTouch_lfp{i} = ACC.lfp(1,[Center_ScTouchidx(1,i)-(srate*2):Center_ScTouchidx(1,i)+(srate*2)]);
         end
     end
 end
 
 if sum(size(Start_ITI)) >= 2 
     for i = 1:length(Start_ITIidx)
-        if (Start_ITIidx(i)+1000)<(length(lfp)) && (Start_ITIidx(i)-1000)>(0)                        
-            Ground.Start_ITI_lfp{i} = Ground.lfp(1,[Start_ITIidx(1,i)-1000:Start_ITIidx(1,i)+1000]);
-            Reference.Start_ITI_lfp{i} = Reference.lfp(1,[Start_ITIidx(1,i)-1000:Start_ITIidx(1,i)+1000]);
-            LC.Start_ITI_lfp{i} = LC.lfp(1,[Start_ITIidx(1,i)-1000:Start_ITIidx(1,i)+1000]);
-            ACC.Start_ITI_lfp{i} = ACC.lfp(1,[Start_ITIidx(1,i)-1000:Start_ITIidx(1,i)+1000]);
+        if (Start_ITIidx(i)+(srate*2))<(length(lfp)) && (Start_ITIidx(i)-(srate*2))>(0)                        
+            Ground.Start_ITI_lfp{i} = Ground.lfp(1,[Start_ITIidx(1,i)-(srate*2):Start_ITIidx(1,i)+(srate*2)]);
+            Reference.Start_ITI_lfp{i} = Reference.lfp(1,[Start_ITIidx(1,i)-(srate*2):Start_ITIidx(1,i)+(srate*2)]);
+            LC.Start_ITI_lfp{i} = LC.lfp(1,[Start_ITIidx(1,i)-(srate*2):Start_ITIidx(1,i)+(srate*2)]);
+            ACC.Start_ITI_lfp{i} = ACC.lfp(1,[Start_ITIidx(1,i)-(srate*2):Start_ITIidx(1,i)+(srate*2)]);
         end
     end
 end
 if sum(size(Stimulus)) >= 2 
     for i = 1:length(Stimulusidx)
-        if (Stimulusidx(i)+1000)<(length(lfp)) && (Stimulusidx(i)-1000)>(0)                      
-            Ground.Stimulus_lfp{i} = Ground.lfp(1,[Stimulusidx(1,i)-1000:Stimulusidx(1,i)+1000]);
-            Reference.Stimulus_lfp{i} = Reference.lfp(1,[Stimulusidx(1,i)-1000:Stimulusidx(1,i)+1000]);
-            LC.Stimulus_lfp{i} = LC.lfp(1,[Stimulusidx(1,i)-1000:Stimulusidx(1,i)+1000]);
-            ACC.Stimulus_lfp{i} = ACC.lfp(1,[Stimulusidx(1,i)-1000:Stimulusidx(1,i)+1000]);
+        if (Stimulusidx(i)+(srate*2))<(length(lfp)) && (Stimulusidx(i)-(srate*2))>(0)                      
+            Ground.Stimulus_lfp{i} = Ground.lfp(1,[Stimulusidx(1,i)-(srate*2):Stimulusidx(1,i)+(srate*2)]);
+            Reference.Stimulus_lfp{i} = Reference.lfp(1,[Stimulusidx(1,i)-(srate*2):Stimulusidx(1,i)+(srate*2)]);
+            LC.Stimulus_lfp{i} = LC.lfp(1,[Stimulusidx(1,i)-(srate*2):Stimulusidx(1,i)+(srate*2)]);
+            ACC.Stimulus_lfp{i} = ACC.lfp(1,[Stimulusidx(1,i)-(srate*2):Stimulusidx(1,i)+(srate*2)]);
         end
     end
 end
 if sum(size(Hit)) >= 2
     for i = 1:length(Hitidx)
-        if (Hitidx(i)+1000)<(length(lfp)) && (Hitidx(i)-1000)>(0)                        
-            Ground.Hit_lfp{i} = Ground.lfp(1,[Hitidx(1,i)-1000:Hitidx(1,i)+1000]);
-            Reference.Hit_lfp{i} = Reference.lfp(1,[Hitidx(1,i)-1000:Hitidx(1,i)+1000]);
-            LC.Hit_lfp{i} = LC.lfp(1,[Hitidx(1,i)-1000:Hitidx(1,i)+1000]);
-            ACC.Hit_lfp{i} = ACC.lfp(1,[Hitidx(1,i)-1000:Hitidx(1,i)+1000]);
+        if (Hitidx(i)+(srate*2))<(length(lfp)) && (Hitidx(i)-(srate*2))>(0)                        
+            Ground.Hit_lfp{i} = Ground.lfp(1,[Hitidx(1,i)-(srate*2):Hitidx(1,i)+(srate*2)]);
+            Reference.Hit_lfp{i} = Reference.lfp(1,[Hitidx(1,i)-(srate*2):Hitidx(1,i)+(srate*2)]);
+            LC.Hit_lfp{i} = LC.lfp(1,[Hitidx(1,i)-(srate*2):Hitidx(1,i)+(srate*2)]);
+            ACC.Hit_lfp{i} = ACC.lfp(1,[Hitidx(1,i)-(srate*2):Hitidx(1,i)+(srate*2)]);
         end
     end
 end    
 if sum(size(Miss)) >= 2
     for i = 1:length(Missidx)
-        if (Missidx(i)+1000)<(length(lfp)) && (Missidx(i)-1000)>(0)               
-            Ground.Miss_lfp{i} = Ground.lfp(1,[Missidx(1,i)-1000:Missidx(1,i)+1000]);
-            Reference.Miss_lfp{i} = Reference.lfp(1,[Missidx(1,i)-1000:Missidx(1,i)+1000]);
-            LC.Miss_lfp{i} = LC.lfp(1,[Missidx(1,i)-1000:Missidx(1,i)+1000]);
-            ACC.Miss_lfp{i} = ACC.lfp(1,[Missidx(1,i)-1000:Missidx(1,i)+1000]);
+        if (Missidx(i)+(srate*2))<(length(lfp)) && (Missidx(i)-(srate*2))>(0)               
+            Ground.Miss_lfp{i} = Ground.lfp(1,[Missidx(1,i)-(srate*2):Missidx(1,i)+(srate*2)]);
+            Reference.Miss_lfp{i} = Reference.lfp(1,[Missidx(1,i)-(srate*2):Missidx(1,i)+(srate*2)]);
+            LC.Miss_lfp{i} = LC.lfp(1,[Missidx(1,i)-(srate*2):Missidx(1,i)+(srate*2)]);
+            ACC.Miss_lfp{i} = ACC.lfp(1,[Missidx(1,i)-(srate*2):Missidx(1,i)+(srate*2)]);
         end
     end
 end
 if sum(size(Correct_Rej)) >= 2
     for i = 1:length(Correct_Rejidx)
-        if (Correct_Rejidx(i)+1000)<(length(lfp)) && (Correct_Rejidx(i)-1000)>(0)                      
-            Ground.Correct_Rej_lfp{i} = Ground.lfp(1,[Correct_Rejidx(1,i)-1000:Correct_Rejidx(1,i)+1000]);
-            Reference.Correct_Rej_lfp{i} = Reference.lfp(1,[Correct_Rejidx(1,i)-1000:Correct_Rejidx(1,i)+1000]);
-            LC.Correct_Rej_lfp{i} = LC.lfp(1,[Correct_Rejidx(1,i)-1000:Correct_Rejidx(1,i)+1000]);
-            ACC.Correct_Rej_lfp{i} = ACC.lfp(1,[Correct_Rejidx(1,i)-1000:Correct_Rejidx(1,i)+1000]);
+        if (Correct_Rejidx(i)+(srate*2))<(length(lfp)) && (Correct_Rejidx(i)-(srate*2))>(0)                      
+            Ground.Correct_Rej_lfp{i} = Ground.lfp(1,[Correct_Rejidx(1,i)-(srate*2):Correct_Rejidx(1,i)+(srate*2)]);
+            Reference.Correct_Rej_lfp{i} = Reference.lfp(1,[Correct_Rejidx(1,i)-(srate*2):Correct_Rejidx(1,i)+(srate*2)]);
+            LC.Correct_Rej_lfp{i} = LC.lfp(1,[Correct_Rejidx(1,i)-(srate*2):Correct_Rejidx(1,i)+(srate*2)]);
+            ACC.Correct_Rej_lfp{i} = ACC.lfp(1,[Correct_Rejidx(1,i)-(srate*2):Correct_Rejidx(1,i)+(srate*2)]);
         end
     end
 end
 if sum(size(False_Alarm)) >= 2
     for i = 1:length(False_Alarmidx)
-        if (False_Alarmidx(i)+1000)<(length(lfp)) && (False_Alarmidx(i)-1000)>(0)                     
-            Ground.False_Alarm_lfp{i} = Ground.lfp(1,[False_Alarmidx(1,i)-1000:False_Alarmidx(1,i)+1000]);
-            Reference.False_Alarm_lfp{i} = Reference.lfp(1,[False_Alarmidx(1,i)-1000:False_Alarmidx(1,i)+1000]);
-            LC.False_Alarm_lfp{i} = LC.lfp(1,[False_Alarmidx(1,i)-1000:False_Alarmidx(1,i)+1000]);
-            ACC.False_Alarm_lfp{i} = ACC.lfp(1,[False_Alarmidx(1,i)-1000:False_Alarmidx(1,i)+1000]);
+        if (False_Alarmidx(i)+(srate*2))<(length(lfp)) && (False_Alarmidx(i)-(srate*2))>(0)                     
+            Ground.False_Alarm_lfp{i} = Ground.lfp(1,[False_Alarmidx(1,i)-(srate*2):False_Alarmidx(1,i)+(srate*2)]);
+            Reference.False_Alarm_lfp{i} = Reference.lfp(1,[False_Alarmidx(1,i)-(srate*2):False_Alarmidx(1,i)+(srate*2)]);
+            LC.False_Alarm_lfp{i} = LC.lfp(1,[False_Alarmidx(1,i)-(srate*2):False_Alarmidx(1,i)+(srate*2)]);
+            ACC.False_Alarm_lfp{i} = ACC.lfp(1,[False_Alarmidx(1,i)-(srate*2):False_Alarmidx(1,i)+(srate*2)]);
         end
     end
 end
