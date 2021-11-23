@@ -216,5 +216,74 @@ end
 
 
 
+%% Some plotting and playing with the data (unnecessary for analysis)
+% total time on task
+figure;
+box off;
+plot(cpt_schLength,ACC.lfp,'k');
+xlabel('Time(s)')
+ylabel('Voltage')
+title('ACC LFP Full Session')
+
+% surrounding hit example 
+% x axis for plot
+hitlength = linspace(-((length(ACC.Hit_lfp{1})/srate)),(length(ACC.Hit_lfp{1})/srate),length(ACC.Hit_lfp{1}));
+figure;
+box off;
+plot(hitlength, ACC.Hit_lfp{1}, 'r')
+xlim ([-4 4])
+xlabel('Time(s)')
+ylabel('Voltage')
+title('ACC LFP surrounding Hit event')
+
+% filter for theta 
+thetasample = bandpass(ACC.Hit_lfp{1},[4 7], 2000);
+gammasample = bandpass(ACC.Hit_lfp{1}, [30 50], 2000);                              
+figure;
+box off;
+subplot 211
+plot(hitlength, thetasample, 'r')
+xlim ([-4 4])
+xlabel('Time(s)')
+ylabel('Voltage (mV)')
+title('Theta Filtered (4-7Hz) Surrounding Hit Event')                                            
+subplot 212
+plot(hitlength, gammasample, 'g')
+xlim ([-4 4])
+xlabel('Time(s)')
+ylabel('Voltage (mV)')
+title('Slow-Gamma Filtered (30-50 Hz) Surrounding Hit Event')
+
+% power spec 
+params.tapers = [5 9];
+params.pad = 0;
+params.Fs = 2000; % Srate
+params.fpass = [0 200];
+params.err = [2 0.05];
+params.trialave = 0;
+
+[S,t,Serr] = mtspectrumc(ACC.lfp, params);
+[S_hit,t_hit,Serr_hit] = mtspectrumc(ACC.Hit_lfp{1}, params);
+
+figure;
+box off;
+p1 = plot (t,S);
+p1.LineWidth = 2;
+p1.Color = [0 .4 0]
+xlim ([0 60]);
+xlabel('Frequencies (Hz)');
+title('Power Spectrum analysis of total task time LFP');
+
+t_hit2 = t_hit.^2
+figure;
+p2 = plot(t_hit2, S_hit);
+p2.LineWidth = 2;
+p2.Color = [0 .4 0]
+xlim ([0 60]);
+xlabel('Frequencies (Hz)');
+title('Power Spectrum analysis of Hit-Centered LFP');
+
+
+
                                      
                                             
