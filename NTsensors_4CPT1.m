@@ -1,4 +1,5 @@
-%% This script is for slicing and analyzing imaging transients
+%% This script is for slicing and analyzing imaging transients of neurotransmitter sensors coupled with miniscope recording
+% using an example of a GRAB NE animal ('1640')%
 
 %% Identify saving variables 
 vars = whos;
