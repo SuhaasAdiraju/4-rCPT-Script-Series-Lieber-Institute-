@@ -1,7 +1,7 @@
-%% Grab Calcium Transients surrounding event timestamps
+%% Grab NTransmitter Transients surrounding event timestamps
 % This script is written assuming the user has followed EFT 4 CPT 1, and
 % has the mouse structure with event timestamps saved as a distinct
-% variable, along with the calcium imaging or bio-sensor imaging,
+% variable, along with bio-sensor imaging,
 % transients saved in a structure
 
 % - Written by Suhaas S Adiraju
