@@ -1,33 +1,53 @@
-%% This script is for slicing and analyzing imaging transients
+function [Ca2Struct] = createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace)
+%% Description 
 
+% This function is for compiling the necessary components for analysis of
+% calcium imaging transients yielded from inscopix software
+
+% We will combine these transients with behavioral event timestamps yielded
+% from ABET software
+
+%% INPUTS
+% Tstamps_path - 
+    % the path to your Tstamps file (coming out of ABET)
+
+% Tstamps_name - 
+    % the name of your timestamps file 
+
+% transients_path - 
+    % path to the file containing your Calcium imaging transients 
+
+% mousename - 
+    % name of the subject and how you want your structure to be saved
+
+% saveplace - 
+    % path to location of where you want your new structure to be saved 
+
+
+%% OUTPUTS
+% Ca2Struct - 
+    % your calcium transients and associated event-based timestamps structure
 
 %% Reading in our main files
 
 % cd to your folder containing the event files (TIMESTAMPS sheet)
 %addpath('D:\08.11.21 ONWARDS\CSV Behavioral Event Files');
-cd('C:\Users\sadiraj1\Desktop');
+cd(Tstamps_path{1});
 
-% what's the filename
-filename = 'CI31541-1_Ephys_Miniscope2_Mouse ICPT Stage 3 Var ITI v1 HORIZONTAL_70.csv'; %your event sheet file name.csv coming out of the ABET software with timestamps
+
 % read in the csv file
-[Tstamps,Titles,EventSheet] = xlsread(filename);
+[Tstamps,Titles,EventSheet] = xlsread(Tstamps_name{1});
 
 % now cd to your imaging output folder (THIS IS THE TRANSIENTS FILE coming out of inscopix)
-cd('C:\Users\sadiraj1\Desktop\Biosensor Imaging Data\11052021-1855-Good-S3-TTL');
+cd(transients_path{1});
 
-% what's the filename
-filename = '1855_good_S3_TTL_Cell_Traces.csv'
 
 % read in the csv file data 
-[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(filename);
+[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(transients_name{1});
 
 % read in the transients matrix (in case xlsread is not working)
 % Ne_transients = readmatrix('1855_good_S3_TTL_Cell_Traces.csv',opts);
 
-% Identify saving variables 
-
-mousename = 'S3Good_1855_Ca2' %name of mouse/what you want to save the struc. as, must start w a letter;
-saveplace = 'Z:\Circuits projects (CPT)\CPT Recording Data\GCaMP6f'; %where are you saving your data
 
 %% Grabbing accepted cells only 
 % remove unusable first row; then flip orientation, so time is x axis 
@@ -35,18 +55,16 @@ Ca_transients = (EventSheet_transients([2:end],[2:end])');
 
 patCell = ' accepted';
 for z = 1:length(Ca_transients(:,1))
-    for rowi = 1:length(Ca_transients)
         if (startsWith((Ca_transients(z,1)),patCell))==1
-            Accept_transients{z}(1,rowi) = Ca_transients(z,[2:end]);
+            Accept_transients{z} = Ca_transients(z,[2:end]);
         elseif (startsWith((Ca_transients(z,1)),patCell))==0
             Accept_transients{z} = [];
         end
-    end
 end
 
-desiredtransients = cellfun(@isempty, Accept_transients);
-desiredtransients = Accept_transients(desiredtransients == 0);
-cell2mat(desiredtransients);
+% desiredtransients = cellfun(@isempty, Accept_transients);
+% desiredtransients = Accept_transients(desiredtransients == 0);
+% cell2mat(desiredtransients);
 
 %% Separating our events
 
@@ -90,6 +108,8 @@ end
 %}
 
 % initialize variables for events of desire (good practice to predefine)
+    % eventually will have user input a structure of desired variables, so
+    % this is mutable, but for now will leave it as set list 
 FIRBeam_On = {};
 FIRBeam_Off = {};
 Center_ScTouch = {}; 
@@ -247,7 +267,7 @@ end
 % checks we can implement here 
 
 if length(Hit) == length(EventSheet([2:end],24))
-    sprintf(('\n\nBecause the length of hits, %d, matches the length of hit events on the original Event Sheet, %d, \nIt seems like timestamps have been accurately parsed out! \nPress any key to continue'),length(Hit),length(EventSheet([2:end],24)))
+    sprintf(('\n\nBecause the length of hits grabbed from the Event sheet, %d,\n accurately matches the length of hit events on the original Event Sheet,\n %d, \nIt seems like timestamps have been accurately parsed out! \nPress any key to continue'),length(Hit),length(EventSheet([2:end],24)))
 else 
     sprintf(('\n The length of hits, %d, does not match the length of hit events on the original Event Sheet, %d, \nThere may be a problem with separating your event timestamps...\nPress any key and check back on your variables'),length(Hit),length(EventSheet([2:end],24)))
 end
@@ -283,6 +303,6 @@ savename. Chamber = cell2mat(chamber(2,3));
 
 % resave the structure to the correct folder
 cd(saveplace);
-save(mousename,'-struct', 'savename');
+save(mousename{1},'-struct', 'savename');
 
 
