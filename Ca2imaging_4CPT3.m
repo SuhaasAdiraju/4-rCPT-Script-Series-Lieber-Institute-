@@ -1,6 +1,6 @@
 %% Basic analysis with behavior-surrounding Ca2 transients 
 % This script is beginning the basic analyses with CA2 imaging such as
-% collapsing across trials;
+% collapsing across events to yield an average response surrounding an event type;
 
 % Written assuming the user has:
     % 1) followed Ca2imaging 4 CPT 1, saved a
