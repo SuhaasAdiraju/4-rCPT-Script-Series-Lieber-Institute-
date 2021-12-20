@@ -1,4 +1,4 @@
-function [Ca2Struct] = createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace)
+function [Ca2Struc] = createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace)
 %% Description 
 
 % This function is for compiling the necessary components for analysis of
