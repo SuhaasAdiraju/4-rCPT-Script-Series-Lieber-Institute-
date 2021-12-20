@@ -1,170 +1,309 @@
-function [slicedSensorStruc] = sliceNTsensors(struc_path, struc_name, srate{1}, TimeWin, saveplace, mousename)
-%% DESCRIPTION
-% This function is to grab neuro-transmitter sensor transients surrounding event timestamps
-% This function is written assuming the user has followed NTsensors4CPT 1, and
-% has the mouse structure with event timestamps saved as a distinct
-% variable, along with the bio-sensor imaging, transients saved in a structure
-
-% - Written by Suhaas S Adiraju
+function [NTmouseStruc] = createStrucNTsensors(Tstamps_path, Tstamps_name, transients_path, transients_name, ROI, saveplace, mousename)
+%% Description
+% This function is for trimming, formatting, and combining neural activity
+% recording data with CPT behavioral timestamps. In order to create a
+% structure of the mouse with the saved timestamps and neural activity data
 
 %% INPUTS 
+% Tstamps_path - 
+    % path to your ABET event timestamps .csv file 
 
-% struc_path = path to folder of saved structure
+% Tstamps_name - 
+    % name of the .csv file
 
-% struc_name = name of saved structure
+% transients_path - 
+    % path to your Inscopix derived transients file 
 
-% srate{1} = sampling rate of recording 
+% ROI - 
+    % optimal region of interest given Inscopix view
 
-% TimeWin = user defined time window size of analysis (ie 4s around each
-% hit event)
+% saveplace - 
+    % where do you want to save your structure??
 
-% saveplace = place you'd like to store your new structure
+% mousename - 
+    % what would you like to name this structure??
 
-% mousename = name you would like to save it as
+%% OUTPUTS
 
-%% OUTPUTS 
+% the structure containing transient data and event timestamps data
+% separated into distinct variables
 
-% structure of transients sliced based on event-type timestamps
+%% Reading in our main files
+
+% cd to your folder containing the event files (timestamps sheet)
+cd(Tstamps_path{1});
+
+% read in the csv file
+[Tstamps,Titles,EventSheet] = xlsread(Tstamps_name{1});
+
+% now cd to your imaging output folder (should be coming out of inscopix)
+cd(transients_path{1});
 
 
-%%
+% read in the csv file data 
+[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(transients_name{1});
 
-% cd to location of of the structure
-cd(struc_path{1});
+% read in the transients matrix (in case xlsread is not working)
+% Ne_transients = readmatrix('1855_good_S3_TTL_Cell_Traces.csv',opts);
 
-% load file of choice
-load (struc_name{1})
 
-Transients = Ne_transients;
+%% 
+% flip orientation, so time is x axis 
+Transients = (EventSheet_transients');
+Transients = (Transients([2:end],[3:end]));
 
-%% Trimming our signal (optional)
+% The rows here are ROIs, set in inscopix, so we can choose the one that
+% fit best, in this case the ROI 5 was most optimal in terms of transient
+% tracking, you should know what ROI you want from inscopix 
 
-% Set transients on the proper timescale, ("give me a vector of 0-total
-% seconds in value, but with a length of the total # of samples in the original matrix")
-Transients_TimeVec = linspace(0, ((length(Transients))/srate{1}{1}), (length(Transients)));
+% So lets only take the 5th row or ROI of interest
+ROIval = cell2mat(ROI);
 
-% you can see right away that the transients length is too long, and we
-% know the cpt schedule is only 1800s (30min), and we know that our
-% 0seconds in the signal is true zero of the cpt task cause we use a TTL
-% so we can trim the transients signal to the length of the cpt
-cpt_length = Transients_TimeVec(Transients_TimeVec <= 1800);
-cpt_transients = Transients(:,[1:(length(cpt_length))]);
+ROItransients = Transients(ROIval,:);
 
-%ylabel('dF/F (change in fluorescent expression)')
+
+ % now we have our event sheet with corresponding timestamps that we wanna
+ % use to grab specific parts of imaging transients
+
+%% Separating our behavioral events sheet 
+
+% This loop will go through your events sheet, see if there is both
+% chambers 3 and 4, or just 3, or just 4, let you know what it found, and
+% create distinct variables with the associated timestamps for chambers 3
+% and 4 
+
+parCh1 = 'Chamber1';
+parCh2 = 'Chamber2';
+%Currently inactive for the output csv (has no chamber indications)
+for z = 1:length(EventSheet(:,3))
+        if (startsWith((EventSheet(z,3)),parCh1))==1
+            while z == 1
+                fprintf ('\nCreating timestamp sheet for Chamber 1...');
+            end
+            Ch1Events = EventSheet(:,:); 
+            chamber = Ch1Events;
+        end
+        if (startsWith((EventSheet(z,3)),parCh2))==1
+            while z == 1
+                fprintf ('\nCreating timestamp sheet for Chamber 2...');
+            end
+            Ch2Events = EventSheet(:,:);
+            chamber = Ch2Events;
+        end
+        
+        if z == length(EventSheet(:,3))
+            if (exist('Ch1Events')) == 1
+                fprintf('\n\nChamber 1 data extracted!')
+            end
+            if (exist ('Ch1Events')) == 0
+                fprintf('\n\nChamber 1 not found.')
+            end
+            if (exist ('Ch2Events')) == 1 
+                fprintf('\n\nChamber 2 data extracted!')
+            end
+            if (exist ('Ch2Events')) == 0
+                fprintf('\n\nChamber 2 not found.')
+            end
+        end
+end
 %}
-%% Equalizing Resolutions
 
-% Now we can grab transients = the length of the cpt schedule
-% Transients = Transients(\);
+% initialize variables for events of desire (good practice to predefine)
+FIRBeam_On = {};
+FIRBeam_Off = {};
+Center_ScTouch = {}; 
+Start_ITI = {};
+Stimulus = {};
+Hit = {};
+Miss = {};
+Correct_Rej = {};
+False_Alarm = {};
 
+%% in loop fashion, we will grab the timestamps event titles and save them seperately 
 
-% First, we must up-sample, to match the scale(resolution) at which we have Transients
-% i.e. event timestamps 
-FIRBeam_Onidx = FIRBeam_On * srate{1}; 
-FIRBeam_Onidx =int64(FIRBeam_Onidx); % here im converting the class of the IDX values because as a double certain vals were not integers (ie 10385.00000 became 1.0385x10e6)
-
-
-FIRBeam_Offidx = FIRBeam_Off * srate{1}; 
-FIRBeam_Offidx = int64(FIRBeam_Offidx);
-
-Center_ScTouchidx = Center_ScTouch * srate{1}; 
-Center_ScTouchidx = int64(Center_ScTouchidx);
-
-Start_ITIidx =Start_ITI * srate{1}; 
-Start_ITIidx = int64(Start_ITIidx);
-
-Stimulusidx = Stimulus * srate{1}; 
-Stimulusidx = int64(Stimulusidx);
-
-Hitidx = Hit * srate{1}; 
-Hitidx = int64(Hitidx);
-
-Missidx = Miss * srate{1}; 
-Missidx = int64(Missidx);
-
-Correct_Rejidx =Correct_Rej * srate{1}; 
-Correct_Rejidx = int64(Correct_Rejidx);
-
-False_Alarmidx = False_Alarm * srate{1}; 
-False_Alarmidx = int64(False_Alarmidx);
-
-%% Now we can grab the Transients of each timestamp
-
-% Make it an if... statement, so that when we have empty variables (S2 as
-%one case) then we can still run the full script and wont be stopped by
-%errors
-
-if sum(size(FIRBeam_On)) >= 2 
-    for i = 1:length(FIRBeam_Onidx)
-        if (FIRBeam_Onidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (FIRBeam_Onidx(i)-(srate{1}*TimeWin{1}))>(0)  
-            CutTransients.FIRBeam_On_transients{i} = Transients(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
+% For FIRBeam On
+pat = 'FIRBeam On'; %event name (this is 'pattern' and used to grab event TStamps based on the title they're under)
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            FIRBeam_On{z} = EventSheet(:,z);
+            FIRBeam_On = FIRBeam_On{z}(2:end)
         end
-    end
+
+        if z == (length(EventSheet(1,:)))
+        FIRBeam_On = cell2mat(FIRBeam_On);  %change from cell array to a double for future computational ease
+        FIRBeam_On = FIRBeam_On'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+        fprintf([pat,'''s have been extracted!\n']);
+        end
 end
 
-if sum(size(FIRBeam_Off)) >= 2 
-    for i = 1:(length(FIRBeam_Offidx))
-        if (FIRBeam_Offidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (FIRBeam_Offidx(i)-(srate{1}*TimeWin{1}))>(0)        
-            CutTransients.FIRBeam_Off_Transients{i} = Transients(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
+% For FIRBeam Off
+pat = 'FIRBeam Off';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            FIRBeam_Off{z} = EventSheet(:,z);
+            FIRBeam_Off = FIRBeam_Off{z}(2:end)
         end
-    end
+    
+        if z == (length(EventSheet(1,:)))
+        FIRBeam_Off = cell2mat(FIRBeam_Off);  %change from cell array to a double for future computational ease
+        FIRBeam_Off = FIRBeam_Off'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+        fprintf([pat,'''s have been extracted!\n']);
+        end
 end
 
-if sum(size(Center_ScTouch)) >= 2 
-    for i = 1:length(Center_ScTouchidx)
-        if (Center_ScTouchidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (Center_ScTouchidx(i)-(srate{1}*TimeWin{1}))>(0)              
-            CutTransients.Center_ScTouch_Transients{i} = Transients(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
+
+% For Center screen touch 
+pat = 'Center Screen Touch';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            Center_ScTouch{z} = EventSheet(:,z);
+            Center_ScTouch = Center_ScTouch{z}(2:end);
         end
-    end
+        
+        if z == (length(EventSheet(1,:)))
+        Center_ScTouch = cell2mat(Center_ScTouch);  %change from cell array to a double for future computational ease
+        Center_ScTouch = Center_ScTouch'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+        fprintf([pat,'es have been extracted!\n']);
+        end
 end
 
-if sum(size(Start_ITI)) >= 2 
-    for i = 1:length(Start_ITIidx)
-        if (Start_ITIidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (Start_ITIidx(i)-(srate{1}*TimeWin{1}))>(0)                        
-            CutTransients.Start_ITI_Transients{i} = Transients(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
+% For Start ITI
+pat = 'Start ITI';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            Start_ITI{z} = EventSheet(:,z);
+            Start_ITI = Start_ITI{z}(2:end)
         end
-    end
-end
-if sum(size(Stimulus)) >= 2 
-    for i = 1:length(Stimulusidx)
-        if (Stimulusidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (Stimulusidx(i)-(srate{1}*TimeWin{1}))>(0)                      
-            CutTransients.Stimulus_Transients{i} = Transients(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
+        %
+        if z == (length(EventSheet(1,:)))
+        Start_ITI = cell2mat(Start_ITI);  %change from cell array to a double for future computational ease
+        Start_ITI = Start_ITI'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+        fprintf([pat,'es have been extracted!\n']);
         end
-    end
-end
-if sum(size(Hit)) >= 2
-    for i = 1:length(Hitidx)
-        if (Hitidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (Hitidx(i)-(srate{1}*TimeWin{1}))>(0)                        
-            CutTransients.Hit_Transients{i} = Transients(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
-        end
-    end
-end    
-if sum(size(Miss)) >= 2
-    for i = 1:length(Missidx)
-        if (Missidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (Missidx(i)-(srate{1}*TimeWin{1}))>(0)               
-            CutTransients.Miss_Transients{i} = Transients(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
-        end
-    end
-end
-if sum(size(Correct_Rej)) >= 2
-    for i = 1:length(Correct_Rejidx)
-        if (Correct_Rejidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (Correct_Rejidx(i)-(srate{1}*TimeWin{1}))>(0)                      
-            CutTransients.Correct_Rej_Transients{i} = Transients(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
-        end
-    end
-end
-if sum(size(False_Alarm)) >= 2
-    for i = 1:length(False_Alarmidx)
-        if (False_Alarmidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (False_Alarmidx(i)-(srate{1}*TimeWin{1}))>(0)                     
-            CutTransients.False_Alarm_Transients{i} = Transients(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
-        end
-    end
 end
 
-%% Can save this structure of sliced transients as well or continue straight into script #3
+% For Stimulus (stimulus presentation)
+pat = 'Stim Onset';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            Stimulus{z} = EventSheet(:,z);
+            Stimulus = Stimulus{z}(2:end)
+        end
+    
+        if z == (length(EventSheet(1,:)))
+        Stimulus = cell2mat(Stimulus);  %change from cell array to a double for future computational ease
+        Stimulus = Stimulus'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+        fprintf([pat,'es have been extracted!\n']);
+        end
+end
+
+
+% Hit
+pat = 'Hit';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            Hit{z} = EventSheet(:,z);
+            Hit = Hit{z}(2:end)
+        end
+
+        if z == (length(EventSheet(1,:)))
+            Hit = cell2mat(Hit);  %change from cell array to a double for future computational ease
+            Hit = Hit'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+            fprintf([pat,'es have been extracted!\n']);
+        end
+end
+
+
+% Miss
+pat = 'Misses';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            Miss{z} = EventSheet(:,z);
+            Miss = Miss{z}(2:end)
+        end
+    
+        if z == (length(EventSheet(1,:)))
+            Miss = cell2mat(Miss);  %change from cell array to a double for future computational ease
+            Miss = Miss'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+            fprintf([pat,'es have been extracted!\n']);
+        end
+end
+
+% Correct_Rej
+pat = 'Correct Rejection';
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            Correct_Rej{z} = EventSheet(:,z);
+            Correct_Rej = Correct_Rej{z}(2:end)
+        end
+    
+        if z == (length(EventSheet(1,:)))
+            Correct_Rej = cell2mat(Correct_Rej);  %change from cell array to a double for future computational ease
+            Correct_Rej = Correct_Rej'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+            fprintf([pat,'es have been extracted!\n']);
+        end
+end
+
+% False_Alarm
+pat = 'Mistakes'; %in abet an S- miss is called 'mistake', but we call it a FAlarm
+for z = 1:length(EventSheet(1,:))
+        if (startsWith(EventSheet(1,z),pat)) == 1
+            False_Alarm{z} = EventSheet(:,z);
+            False_Alarm = False_Alarm{z}(2:end)
+        end
+    
+        if z == (length(EventSheet(1,:)))
+            False_Alarm = cell2mat(False_Alarm);  %change from cell array to a double for future computational ease
+            False_Alarm = False_Alarm'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
+            fprintf([pat,' have been extracted!\n']);
+        end
+end
+
+
+%% Sanity Checks
+% To check if things are working well, its good practice to open up
+% variables and make sure they look right, but there are a couple of sanity
+% checks we can implement here 
+
+if length(Hit) == length(EventSheet([2:end],24))
+fprintf ('\nIt seems like timestamps have been accurately parsed out! Press any key to continue!')
+else 
+    disp ('\nThere may be a problem with separating your event timestamps...')
+end
+
+pause
+
+
+% we can do this also
+
+if (cell2mat(EventSheet(2,24))) == Hit(1)
+    fprintf ('\nIt seems like timestamps have been accurately parsed out! Press any key to continue!')
+else 
+    disp ('\nThere may be a problem with separating your event timestamps...')
+end
+
+pause
+
+%% Create Structures
+% remove excess zeros, and add to loaded mousename structure
+savename. Transients = cell2mat(ROItransients);
+savename. FIRBeam_On = FIRBeam_On(isnan(FIRBeam_On) == 0);
+savename. FIRBeam_Off = FIRBeam_Off(isnan(FIRBeam_Off) == 0);
+savename. Center_ScTouch = Center_ScTouch(isnan(Center_ScTouch) == 0);
+savename. Start_ITI = Start_ITI(isnan(Start_ITI(2:end)) == 0);
+savename. Stimulus = Stimulus(isnan(Stimulus(2:end)) == 0);
+savename. Hit = Hit(isnan(Hit) == 0);
+savename. Miss = Miss(isnan(Miss) == 0);
+savename. Correct_Rej = Correct_Rej(isnan(Correct_Rej) == 0);
+savename. False_Alarm = False_Alarm(isnan(False_Alarm) == 0);
+savename. Chamber = cell2mat(chamber(2,3));
+
+%% resave the structure to the correct folder
 cd(saveplace{1});
-save(mousename{1}, '-struct', 'savename')
-
-sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1})
+save(mousename{1},'-struct', 'savename');
+sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1});
 end
+
+
+
 
