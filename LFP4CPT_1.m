@@ -1,7 +1,36 @@
-% This script is a walkthrough of how to handle CPT recorded LFP data. 
-% More specifically how to combine the event data with recordings 
-
+function [mouseStruc] = createStructLFP(lfp_path,lfp_name, mousename, saveplace, Tstamps_path, Tstamps_filename)
+%% Description
+    % This function is for the initial process of handling CPT recorded LFP data. 
+    % More specifically how to combine the event data with recordings. It
+    % assumes you have completed LFP4CPT 1 or performed the sirenia2mat
+    % conversions
+    
+    
 % - Written by Suhaas S. Adiraju 09.30.21
+
+
+%% INPUTS
+    % lfp_path - 
+        % path to your lfp file saved after using sirenia2mat
+
+    % lfp_name - 
+        % name of the file 
+
+    % Tstamps_path - 
+        % path to timestamps sheet that comes out of ABET
+
+    % Tstamps_filename - 
+        % name of timestamps file that comes out of ABET
+
+    % mousename - 
+        % name of the structure you're gonna make
+
+    % saveplace - 
+        % path of location you'd like to save said structure
+%% OUTPUTS
+    % mouseStruc - 
+        % structure containing lfp and timestamps you're gonna make
+
 
 %% HEADS UP !
 
@@ -15,28 +44,24 @@
 
 %% Walkthrough...
 
-% toggle to the folder with the saved mouse structure containing LFP (created using sirenia2mat
-% function) 
+% toggle to the folder with the saved mouse structure containing LFP (created using sirenia2mat function) 
 
- %'yourpath'
-clear; clc 
-
-cd('Z:\Circuits projects (CPT)\CPT Recording Data\LC-mPFC LFP');
+cd(lfp_path{1});
 
 
 
 %%
-load ('S3Good_1700S.mat'); %load said structure, you need '.mat'
+savename  = load (lfp_name{1}); %load said structure, you need '.mat'
 
 
 % rename the mouse structure you want to complete so we can add to it.
-savename = S3Good_1700S; % you dont need '.mat'
-saveplace = ['Z:\Circuits projects (CPT)\CPT Recording Data\LC-mPFC LFP']% path to folder you'd like to save resulting structure in
+        %savename = lfp_name{1}; % you dont need '.mat'
+        % saveplace = ['Z:\Circuits projects (CPT)\CPT Recording Data\LC-mPFC LFP']% path to folder you'd like to save resulting structure in
 
 % BUT, also define a mousename, so we can re-save the structure w/ the
 % correct name 
-vars= whos;
-mousename = vars.name;
+    % vars= whos;
+    % mousename = vars.name;
 
 
 % OPEN your cpt behavioral events file (these are taken off of CPT chamber
@@ -46,7 +71,7 @@ mousename = vars.name;
 % using dates etc., so it's a good thing to keep in mind when naming
 % behavioral/recording sessions)
 
-cd('D:\08.11.21 ONWARDS\CSV Behavioral Event Files\new timestamps');
+cd(Tstamps_path{1});
 
 
 
@@ -55,7 +80,7 @@ cd('D:\08.11.21 ONWARDS\CSV Behavioral Event Files\new timestamps');
 % now, identify which file from the left-hand side directory you'd like to
 % use
 
-filename = '1700 S final.csv'; 
+filename = Tstamps_filename{1}; 
 
 [Tstamps,Titles,EventsFull] = xlsread(filename); % convert to cell arrays
 % this pops out three things to work with, just the TStamp values, just the
@@ -107,7 +132,8 @@ end
             
 
 % initialize variables for events of desire (good practice to predefine)
-
+    % Eventually, we can have the user input what variables they desire,
+    % and whatever/however many will be pre-allocated for
 FIRBeam_On = {};
 FIRBeam_Off = {};
 Center_ScTouch = {}; 
@@ -290,13 +316,10 @@ savename. False_Alarm = False_Alarm(isnan(False_Alarm) == 0);
 savename. ChamberSource  = chamber(3,3);
 
 % resave the structure to the correct folder
-cd(saveplace);
-save(mousename,'-struct','savename');
+cd(saveplace{1});
 
-%% 
-fprintf('\n\nDONE! Checkout your structure on the left-hand side, if it looks complete, press any key to clear the workspace');
+save(mousename{1},'-struct','savename');
 
+sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''!',saveplace{1},mousename{1})
 
-pause   
-
-clear;
+end
