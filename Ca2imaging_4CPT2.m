@@ -1,6 +1,6 @@
+function [varargout] = sliceCa2(struc_path, struc_name, srate, TimeWin, mousename, saveplace);
 
 %% Description
-
 % Grab Calcium Transients surrounding event timestamps
 % This function is written assuming the user has followed Ca2imaging 4 CPT 1, and
 % has the mouse structure with event timestamps saved as a distinct
@@ -29,6 +29,7 @@
     % seconds surrounding hit
 
 %% OUTPUTS 
+
 % Single structure containing all neurons sliced transients based on event
 % type
 
@@ -95,7 +96,6 @@ False_Alarmidx = False_Alarm * srate{1};
 False_Alarmidx = int64(False_Alarmidx);
 
 %% Now we can grab the Transients of each timestamp
-struc_name
 % EXPLAIN // SANITY CHECKS // CHANGE THE REST
 % Okay so we know wanna grab our transients based on the timestamp,
 % assessing our variables to do so, we have 
@@ -212,30 +212,9 @@ x = input('If you would like to save the sliced transients structure, you may, b
 if x == 1
  cd(saveplace{1});
  save(mousename{1},'-struct', 'CutTransients');
+ sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1})
 elseif x == 2
 end
+
 end
 
-%% Some plotting for fun;
-
-len = size (Transients);
-for z = 1:(len(1,1))
-    figure; box off
-    plot(cpt_length, cpt_transients(z, :), 'Color',[0.75, 0, 0.75])
-    set(gca,'visible','off')
-    set(gca,'xtick',[])
-    title (sprintf('Cell %d ''s Trace during rCPT', z));
-    xlabel('Time (s)')
-end
-
-% plot transients surrounding first hit 
-hitlength = linspace(-((length(CutTransients.Hit_Transients{1})/srate)),(length(CutTransients.Hit_Transients{1})/srate),length(CutTransients.Hit_Transients{1}));
-
-for z = 1:length(CutTransients.Hit_Transients)
-    figure;
-    plot(hitlength, CutTransients.Hit_Transients{z},'Color',[0.75, 0, 0.75], 'LineWidth',1.5)
-    xlabel('Time(s)')
-    ylabel('dF/F')
-    xlim ([-4 4])
-    ylim([-10 50])
-end
