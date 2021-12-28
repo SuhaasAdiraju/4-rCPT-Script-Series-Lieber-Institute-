@@ -1,6 +1,6 @@
-function [slicedSensorStruc] = sliceNTsensors(struc_path, struc_name, srate{1}, TimeWin, saveplace, mousename)
+function [slicedSensorStruc] = sliceNTsensors(struc_path, struc_name, srate, TimeWin, saveplace, mousename);
 %% DESCRIPTION
-% This function is to grab neurotransmitter sensor transients surrounding event timestamps
+% This function is to grab neuro-transmitter sensor transients surrounding event timestamps
 % This function is written assuming the user has followed NTsensors4CPT 1, and
 % has the mouse structure with event timestamps saved as a distinct
 % variable, along with the bio-sensor imaging, transients saved in a structure
@@ -41,13 +41,14 @@ Transients = Ne_transients;
 
 % Set transients on the proper timescale, ("give me a vector of 0-total
 % seconds in value, but with a length of the total # of samples in the original matrix")
-Transients_TimeVec = linspace(0, ((length(Transients))/srate{1}{1}), (length(Transients)));
+Transients_TimeVec = linspace(0, ((length(Transients))/srate{1}), (length(Transients)));
 
 % you can see right away that the transients length is too long, and we
 % know the cpt schedule is only 1800s (30min), and we know that our
 % 0seconds in the signal is true zero of the cpt task cause we use a TTL
 % so we can trim the transients signal to the length of the cpt
 cpt_length = Transients_TimeVec(Transients_TimeVec <= 1800);
+assignin("base","cpt_length", cpt_length);
 cpt_transients = Transients(:,[1:(length(cpt_length))]);
 
 %ylabel('dF/F (change in fluorescent expression)')
@@ -97,7 +98,7 @@ False_Alarmidx = int64(False_Alarmidx);
 if sum(size(FIRBeam_On)) >= 2 
     for i = 1:length(FIRBeam_Onidx)
         if (FIRBeam_Onidx(i)+(srate{1}*TimeWin{1}))<(length(Transients)) && (FIRBeam_Onidx(i)-(srate{1}*TimeWin{1}))>(0)  
-            CutTransients.FIRBeam_On_transients{i} = Transients(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
+            CutTransients.FIRBeam_On_Transients{i} = Transients(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
@@ -161,10 +162,11 @@ if sum(size(False_Alarm)) >= 2
     end
 end
 
+CutTransients.srate = srate{1};
+CutTransients.TimeWin = TimeWin{1};
 %% Can save this structure of sliced transients as well or continue straight into script #3
 cd(saveplace{1});
-save(mousename{1}, '-struct', 'savename')
-
-sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1})
+save(mousename{1}, '-struct', 'CutTransients')
+assignin("base",mousename{1},CutTransients)
+sprintf('Your new structure has been saved!\nPath: ''%s'',\nName: ''%s''\nAs well as in the Workspace, for immediate use...',saveplace{1},mousename{1})
 end
-
