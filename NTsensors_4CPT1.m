@@ -1,4 +1,4 @@
-function [NTmouseStruc] = createStrucNTsensors(Tstamps_path, Tstamps_name, transients_path, transients_name, ROI, saveplace, mousename)
+function [NTmouseStruc] = createStrucNTsensors(Tstamps_path, Tstamps_name, transients_path, transients_name, ROI, saveplace, mousename);
 %% Description
 % This function is for trimming, formatting, and combining neural activity
 % recording data with CPT behavioral timestamps. In order to create a
@@ -301,9 +301,10 @@ savename. Chamber = cell2mat(chamber(2,3));
 %% resave the structure to the correct folder
 cd(saveplace{1});
 save(mousename{1},'-struct', 'savename');
-sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1});
+assignin("base", mousename{1}, savename);
+
+sprintf('Your new structure has been saved!\nPath: ''%s'',\nName: ''%s''\nAnd also exists in the workspace for immediate use...',saveplace{1},mousename{1})
+
 end
-
-
 
 
