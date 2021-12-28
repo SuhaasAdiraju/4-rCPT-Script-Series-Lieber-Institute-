@@ -320,6 +320,6 @@ cd(saveplace{1});
 
 save(mousename{1},'-struct','savename');
 
-sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''!',saveplace{1},mousename{1})
+sprintf('Your new structure has been saved with in path ''%s'', with name ''%s''!',saveplace{1},mousename{1})
 
 end
