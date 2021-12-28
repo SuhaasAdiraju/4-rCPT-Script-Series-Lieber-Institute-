@@ -1,6 +1,6 @@
 function [slicedSensorStruc] = sliceNTsensors(struc_path, struc_name, srate{1}, TimeWin, saveplace, mousename)
 %% DESCRIPTION
-% This function is to grab neuro-transmitter sensor transients surrounding event timestamps
+% This function is to grab neurotransmitter sensor transients surrounding event timestamps
 % This function is written assuming the user has followed NTsensors4CPT 1, and
 % has the mouse structure with event timestamps saved as a distinct
 % variable, along with the bio-sensor imaging, transients saved in a structure
