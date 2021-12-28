@@ -1,4 +1,4 @@
-function [Ground, Reference, LC, ACC, cpt_schLength] = sliceLFP(path2struc, struc_name, srate{1}, TimeWin{1})
+function [Ground, Reference, LC, ACC, cpt_schLength] = sliceLFP(path2struc, struc_name, srate, TimeWin, saveplace, mousename)
 %% Description
     % this function assumes you have completed processes from LFP4CPT script 1, and thus have
     % structures containing lfp combined with event TStamps for the subject
@@ -147,7 +147,7 @@ False_Alarmidx = False_Alarm * srate{1};
 False_Alarmidx = int64(False_Alarmidx);
  
 
-% now we can grab the lfp of each timestamp
+%% now we can grab the lfp of each timestamp
 
 % Make it an if... statement, so that when we have empty variables (S2 as
 %one case) then we can still run the full script and wont be stopped by
@@ -155,10 +155,10 @@ False_Alarmidx = int64(False_Alarmidx);
 if sum(size(FIRBeam_On)) >= 2 
     for i = 1:length(FIRBeam_Onidx)
         if (FIRBeam_Onidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (FIRBeam_Onidx(i)-(srate{1}*TimeWin{1}))>(0)  
-            savename.Ground.FIRBeam_On_lfp{i} = Ground.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.FIRBeam_On_lfp{i} = Reference.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.FIRBeam_On_lfp{i} = LC.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.FIRBeam_On_lfp{i} = ACC.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.FIRBeam_On_lfp{i} = savename.Ground.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.FIRBeam_On_lfp{i} = savename.Reference.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.FIRBeam_On_lfp{i} = savename.LC.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.FIRBeam_On_lfp{i} = savename.ACC.lfp(1,[FIRBeam_Onidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Onidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
@@ -166,10 +166,10 @@ end
 if sum(size(FIRBeam_Off)) >= 2 
     for i = 1:(length(FIRBeam_Offidx))
         if (FIRBeam_Offidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (FIRBeam_Offidx(i)-(srate{1}*TimeWin{1}))>(0)        
-            savename.Ground.FIRBeam_Off_lfp{i} = Ground.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.FIRBeam_Off_lfp{i} = Reference.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.FIRBeam_Off_lfp{i} = LC.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.FIRBeam_Off_lfp{i} = ACC.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.FIRBeam_Off_lfp{i} = savename.Ground.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.FIRBeam_Off_lfp{i} = savename.Reference.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.FIRBeam_Off_lfp{i} = savename.LC.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.FIRBeam_Off_lfp{i} = savename.ACC.lfp(1,[FIRBeam_Offidx(1,i)-(srate{1}*TimeWin{1}):FIRBeam_Offidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
@@ -177,10 +177,10 @@ end
 if sum(size(Center_ScTouch)) >= 2 
     for i = 1:length(Center_ScTouchidx)
         if (Center_ScTouchidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (Center_ScTouchidx(i)-(srate{1}*TimeWin{1}))>(0)              
-            savename.Ground.Center_ScTouch_lfp{i} = Ground.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.Center_ScTouch_lfp{i} = Reference.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.Center_ScTouch_lfp{i} = LC.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.Center_ScTouch_lfp{i} = ACC.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.Center_ScTouch_lfp{i} = savename.Ground.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.Center_ScTouch_lfp{i} = savename.Reference.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.Center_ScTouch_lfp{i} = savename.LC.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.Center_ScTouch_lfp{i} = savename.ACC.lfp(1,[Center_ScTouchidx(1,i)-(srate{1}*TimeWin{1}):Center_ScTouchidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
@@ -188,77 +188,77 @@ end
 if sum(size(Start_ITI)) >= 2 
     for i = 1:length(Start_ITIidx)
         if (Start_ITIidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (Start_ITIidx(i)-(srate{1}*TimeWin{1}))>(0)                        
-            savename.Ground.Start_ITI_lfp{i} = Ground.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.Start_ITI_lfp{i} = Reference.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.Start_ITI_lfp{i} = LC.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.Start_ITI_lfp{i} = ACC.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.Start_ITI_lfp{i} = savename.Ground.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.Start_ITI_lfp{i} = savename.Reference.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.Start_ITI_lfp{i} = savename.LC.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.Start_ITI_lfp{i} = savename.ACC.lfp(1,[Start_ITIidx(1,i)-(srate{1}*TimeWin{1}):Start_ITIidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
 if sum(size(Stimulus)) >= 2 
     for i = 1:length(Stimulusidx)
         if (Stimulusidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (Stimulusidx(i)-(srate{1}*TimeWin{1}))>(0)                      
-            savename.Ground.Stimulus_lfp{i} = Ground.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.Stimulus_lfp{i} = Reference.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.Stimulus_lfp{i} = LC.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.Stimulus_lfp{i} = ACC.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.Stimulus_lfp{i} = savename.Ground.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.Stimulus_lfp{i} = savename.Reference.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.Stimulus_lfp{i} = savename.LC.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.Stimulus_lfp{i} = savename.ACC.lfp(1,[Stimulusidx(1,i)-(srate{1}*TimeWin{1}):Stimulusidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
 if sum(size(Hit)) >= 2
     for i = 1:length(Hitidx)
         if (Hitidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (Hitidx(i)-(srate{1}*TimeWin{1}))>(0)                        
-            savename.Ground.Hit_lfp{i} = Ground.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.Hit_lfp{i} = Reference.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.Hit_lfp{i} = LC.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.Hit_lfp{i} = ACC.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.Hit_lfp{i} = savename.Ground.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.Hit_lfp{i} = savename.Reference.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.Hit_lfp{i} = savename.LC.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.Hit_lfp{i} = savename.ACC.lfp(1,[Hitidx(1,i)-(srate{1}*TimeWin{1}):Hitidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end    
 if sum(size(Miss)) >= 2
     for i = 1:length(Missidx)
         if (Missidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (Missidx(i)-(srate{1}*TimeWin{1}))>(0)               
-            savename.Ground.Miss_lfp{i} = Ground.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.Miss_lfp{i} = Reference.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.Miss_lfp{i} = LC.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.Miss_lfp{i} = ACC.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.Miss_lfp{i} = savename.Ground.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.Miss_lfp{i} = savename.Reference.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.Miss_lfp{i} = savename.LC.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.Miss_lfp{i} = savename.ACC.lfp(1,[Missidx(1,i)-(srate{1}*TimeWin{1}):Missidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
 if sum(size(Correct_Rej)) >= 2
     for i = 1:length(Correct_Rejidx)
         if (Correct_Rejidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (Correct_Rejidx(i)-(srate{1}*TimeWin{1}))>(0)                      
-            savename.Ground.Correct_Rej_lfp{i} = Ground.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.Correct_Rej_lfp{i} = Reference.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.Correct_Rej_lfp{i} = LC.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.Correct_Rej_lfp{i} = ACC.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.Correct_Rej_lfp{i} = savename.Ground.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.Correct_Rej_lfp{i} = savename.Reference.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.Correct_Rej_lfp{i} = savename.LC.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.Correct_Rej_lfp{i} = savename.ACC.lfp(1,[Correct_Rejidx(1,i)-(srate{1}*TimeWin{1}):Correct_Rejidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
 if sum(size(False_Alarm)) >= 2
     for i = 1:length(False_Alarmidx)
         if (False_Alarmidx(i)+(srate{1}*TimeWin{1}))<(length(lfp)) && (False_Alarmidx(i)-(srate{1}*TimeWin{1}))>(0)                     
-            savename.Ground.False_Alarm_lfp{i} = Ground.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.Reference.False_Alarm_lfp{i} = Reference.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.LC.False_Alarm_lfp{i} = LC.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
-            savename.ACC.False_Alarm_lfp{i} = ACC.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Ground.False_Alarm_lfp{i} = savename.Ground.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.Reference.False_Alarm_lfp{i} = savename.Reference.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.LC.False_Alarm_lfp{i} = savename.LC.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
+            savename.ACC.False_Alarm_lfp{i} = savename.ACC.lfp(1,[False_Alarmidx(1,i)-(srate{1}*TimeWin{1}):False_Alarmidx(1,i)+(srate{1}*TimeWin{1})]);
         end
     end
 end
 
+%% Saving / Moving forward
 sprintf('Everything has been extracted!\nNow you have 4 separate structures (within your main mouse structure)\nOne for each channel...\nAnd within them\nRaw LFP, and event based extracted LFP windows of data!')
-
-x = input('\n\nWould you like to save all of these channels automatically? It may take a while...\n  -Or you can move forward with processing the variables you have(right side) and save later\n  -Or you can save individual things manually\n\nInput ''1'' to save all automatically\nInput ''2'' to handle it on your own...')
+x = input('Would you like to save all of these channels automatically? It could take a while...\n  -Or you can move forward with processing the variables you have(right side) and save later\n  -Or you can save individual things manually\n\nInput ''1'' to save all automatically\nInput ''2'' to handle it on your own...')
 if x == 1
-    y = input('Where would you like to save these structures?\nINPUT STYLE {''path''}')
-    cd(y{1})
+    %y = input('Where would you like to save these structures?\nINPUT STYLE {''path''}')
+    cd(saveplace{1})
     save(mousename{1},'-struct','savename')
 %     save('Ground', '-struct','Ground')
 %     save('LC', '-struct','LC')
 %     save('Reference', '-struct','Reference')
-    sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''!',y{1},mousename{1})
-elseif x == 0 
+    sprintf('Your new structure has been saved with in path ''%s'',\nwith name ''%s''!',saveplace{1},mousename{1})
+elseif x == 2 
+    assignin('base',mousename{1},savename)
 end
 
 end
-                                                                              
