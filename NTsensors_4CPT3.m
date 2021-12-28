@@ -1,12 +1,12 @@
-%% Basic analysis with behavior-surrounding Ca2 transients 
-% This function is beginning the basic analyses with CA2 imaging such as
+%% Basic analysis with behavior-surrounding Neurotransmitter sensor transients 
+% This function is beginning the basic analyses with NTsensor imaging such as
 % collapsing across trials;
 
 % Written assuming the user has:
     % 1) followed NTsensors 4 CPT 1, saved a
     % structure with raw data and timestamps
     
-    % 2) followed Ca2imaging 4 CPT 2, produced the 'CutTransients' structure,
+    % 2) followed NTsensors 4 CPT 2, produced the 'CutTransients' structure,
     % and now is coming over to start analysis using this script 
 
 % This also uses the example of the Event "Hits", but can be implemented
