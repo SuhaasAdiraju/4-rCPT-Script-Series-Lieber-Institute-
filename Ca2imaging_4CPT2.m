@@ -37,7 +37,7 @@ function [varargout] = sliceCa2(struc_path, struc_name, srate, TimeWin, mousenam
 
 % Each event-type sliced transients (same thing just not in single
 % structure format)
-%%
+%% Load
 % cd to location of of the structure
 cd(struc_path{1}); 
 
@@ -201,20 +201,22 @@ if sum(size(False_Alarm)) >= 2
     end
 end
 
-
+CutTransients.srate = srate{1};
+CutTransients.TimeWin = TimeWin{1};
 %% Save work
 % you can resave the enitre 'CutTransients' structure, or individual
 % variables of desire or whatever...
 
 % The whole structure
-x = input('If you would like to save the sliced transients structure, you may, but it will take a while most likely,\nand will be quite hefty to load in.\n\nYou can also take the outputs of the function, and move forward with your processing analysis, \nwithout saving this step \n\nIf you would like to save the whole thing indicate so using ''1''\nIf you would like to move forward with output data instead of saving right now indicate ''2''');
+x = input('If you would like to save the sliced transients structure, you may, but it could take a while,\nand may be hefty to load in.\nYou can also take the outputs of the function, and move forward with your processing analysis, \nwithout saving this step...\nIf you would like to save the whole thing enter 1\nIf you would like to move forward with output data instead of saving right now enter 2\n');
 
 if x == 1
  cd(saveplace{1});
  save(mousename{1},'-struct', 'CutTransients');
- sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1})
+ sprintf('Your new structure has been saved in \nPath: ''%s'',\nName ''%s''',saveplace{1},mousename{1})
 elseif x == 2
+ assignin('base',mousename{1},CutTransients);
+ sprintf('Your new structure is created as\nName ''%s'',\nAnd is in the Workspace',mousename{1})
 end
 
 end
-
