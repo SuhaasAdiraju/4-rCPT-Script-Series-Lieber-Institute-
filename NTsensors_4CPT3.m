@@ -1,5 +1,5 @@
-%% Basic analysis with behavior-surrounding Neurotransmitter sensor transients 
-% This function is beginning the basic analyses with NTsensor imaging such as
+%% Basic analysis with behavior-surrounding NTsensor transients 
+% This script is beginning the basic analyses with Neurotransmitter sensor imaging such as
 % collapsing across trials;
 
 % Written assuming the user has:
@@ -14,13 +14,19 @@
 
 % - Written by Suhaas S Adiraju
 
-%% Loading in your data
+%% Loading in your data (SKIP IF STRUCTURE IN WORKSPACE ALREADY)
 % Typically, the user should carry over the data and variables generated
 % from NTsensors_4CPT2, but, if you saved the outputs of that script, you
 % should load them in via...
 
-cd('path');
-load('variablename.mat'); %should be the CutTransients structure
+cd('Z:\Circuits projects (CPT)\CPT Recording Data\EXAMPLE SCRIPTS SAMPLE DATA'); 
+load('GRAB_NE_1640_sample.mat'); 
+
+%% Define some necessary variables
+strucname = GRAB_NE_1640_sample; % enter the name of the structure 
+Event_Type = strucname.Center_ScTouch_Transients; % enter the name of the event-type of desire
+srate = strucname.srate;
+TimeWin = strucname.TimeWin;
 
 %% Create a new array...
 
@@ -29,9 +35,9 @@ load('variablename.mat'); %should be the CutTransients structure
 % should be from event one, then (1,2) should be the first
 % timestamp-associated transient value from event two;
 
-for eventi = 1:length(CutTransients.Hit_Transients)
-    for stampi = 1:length(CutTransients.Hit_Transients{1,1})
-        AllEventArray(eventi,stampi) = CutTransients.Hit_Transients{1,eventi}(1,stampi);
+for eventi = 1:length(Event_Type)
+    for stampi = 1:length(Event_Type{1,1})
+        AllEventArray(eventi,stampi) = Event_Type{1,eventi}(1,stampi);
     end
 end
 
@@ -40,10 +46,12 @@ AllEventAvg = mean(AllEventArray,1);
 
 %% Now we can plot...
 
-hitlength = linspace(-(length(CutTransients.Hit_Transients{1})/(srate*(TimeWin/2))),(length(CutTransients.Hit_Transients{1})/(srate*(TimeWin/2))),length(CutTransients.Hit_Transients{1}));
+hitlength = linspace(-(length(Event_Type{1})/(srate*(TimeWin/2))),(length(Event_Type{1})/(srate*(TimeWin/2))),length(Event_Type{1}));
 
 figure;
 plot(hitlength, AllEventAvg,'k', 'LineWidth',1)
-ylim([0.04 0.05])
-xlim([-4 4])
+%ylim([0.04 0.05])
+title (sprintf('Avg Response Window (%d s)',TimeWin))
+xlim([-TimeWin TimeWin])
+
 
