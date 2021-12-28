@@ -1,4 +1,4 @@
-function [Ca2Struc] = createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace)
+function [Ca2Struct] = createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace);
 %% Description 
 
 % This function is for compiling the necessary components for analysis of
@@ -304,6 +304,6 @@ savename. Chamber = cell2mat(chamber(2,3));
 % resave the structure to the correct folder
 cd(saveplace{1});
 save(mousename{1},'-struct', 'savename');
-sprintf('Your new structure has been saved with in path ''%d'', with name ''%d''',saveplace{1},mousename{1})
-
+sprintf('Your new structure has been saved with in path ''%s'', with name ''%s''',num2str(saveplace{1}),num2str(mousename{1}))
 end
+
