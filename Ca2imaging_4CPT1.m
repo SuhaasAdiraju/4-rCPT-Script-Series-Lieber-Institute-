@@ -1,3 +1,59 @@
+%% Ca2Imaging_4CPT1
+% this is a companion/example/template script for running the fuction
+% createStrucCA2. The end result is a structure containing inscopix derived
+% CA2 transients, and ABET ....
+
+% Written by Suhaas S Adiraju
+
+%% First things first...
+
+% The function we will be using here is called 'createStrucCA2'
+
+% You need to have the correct paths added for whatever you work on in
+% matlab so it knows where to source from 
+% This can be permanantly set, but for now, this method works smoothest
+    % path for the function used in this script
+functionpath = {'Z:\Circuits projects (CPT)\Working With BioSensor Transients'}
+addpath(functionpath{1});
+
+
+%% Identify Required Variables
+
+% Read the function description to understand the required inputs 
+open createStrucCA2
+
+%% Define required input variables 
+
+ sprintf('\n\n Press any key to continue, when you do,\n A file selector will pop up,\n Then select your behavioral Timestamps file from ABET')
+ pause
+ [Tstamps_name, Tstamps_path] = uigetfile
+        % Tstamps_path = {'Z:\Circuits projects (CPT)\CPT Recording Data\EXAMPLE SCRIPTS SAMPLE DATA'};
+
+        %Tstamps_name = {'CA2_1855_Timestamps_Ca2.csv'};
+
+ sprintf('\n\n Press any key to continue, when you do,\n A file selector will pop up,\n Then select your calcium imaging transients file from Inscopix')
+ pause
+ [transients_name, transients_path] = uigetfile
+        %transients_path = {'Z:\Circuits projects (CPT)\CPT Recording Data\EXAMPLE SCRIPTS SAMPLE DATA'};
+
+        %transients_name = {'CA2_1855_good_S3_TTL_Cell_Traces.csv'}; % dont forget .csv!!
+sprintf('\n\n Press any key to continue, when you do,\n A window will pop up,\n Then enter WHAT WOULD YOU LIKE TO NAME YOUR RESULTING STRUCTURE')
+pause
+prompt = {'Enter mousename, aka what you would like to name the output structure from this function?'}
+mousename = inputdlg(prompt);        %{'CA2_1855_good_S3_TTL_Cell_Traces'}; %name of mouse/what you want to save the struc. as, must start w a letter;
+
+sprintf('\n\n Press any key to continue, when you do,\n A file selector will pop up,\n Then select the the path to where you would like to save your new structure')
+pause
+saveplace = uigetdir
+        %saveplace = {'Z:\Circuits projects (CPT)\CPT Recording Data\EXAMPLE SCRIPTS SAMPLE DATA'}; %where are you saving your data
+
+%% All set! Run your function
+% Run
+sprintf('All necessary inputs have been recieved, running createStrucCA2 function!')
+createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace)
+
+
+%% THE FUNCTION 
 function [Ca2Struct] = createStrucCA2(Tstamps_path, Tstamps_name, transients_path, transients_name, mousename, saveplace);
 %% Description 
 
@@ -7,6 +63,7 @@ function [Ca2Struct] = createStrucCA2(Tstamps_path, Tstamps_name, transients_pat
 % We will combine these transients with behavioral event timestamps yielded
 % from ABET software
 
+% Written by Suhaas S Adiraju
 %% INPUTS
 % Tstamps_path - 
     % the path to your Tstamps file (coming out of ABET)
@@ -32,18 +89,18 @@ function [Ca2Struct] = createStrucCA2(Tstamps_path, Tstamps_name, transients_pat
 
 % cd to your folder containing the event files (TIMESTAMPS sheet)
 %addpath('D:\08.11.21 ONWARDS\CSV Behavioral Event Files');
-cd(Tstamps_path{1});
+cd(Tstamps_path);
 
 
 % read in the csv file
-[Tstamps,Titles,EventSheet] = xlsread(Tstamps_name{1});
+[Tstamps,Titles,EventSheet] = xlsread(Tstamps_name);
 
 % now cd to your imaging output folder (THIS IS THE TRANSIENTS FILE coming out of inscopix)
-cd(transients_path{1});
+cd(transients_path);
 
 
 % read in the csv file data 
-[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(transients_name{1});
+[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(transients_name);
 
 % read in the transients matrix (in case xlsread is not working)
 % Ne_transients = readmatrix('1855_good_S3_TTL_Cell_Traces.csv',opts);
@@ -133,7 +190,7 @@ for z = 1:length(EventSheet(1,:))
         if z == (length(EventSheet(1,:)))
         FIRBeam_On = cell2mat(FIRBeam_On);  %change from cell array to a double for future computational ease
         FIRBeam_On = FIRBeam_On'; %flip the dimension, so instead of a column vector, its a row vector, matching Transients signal
-        fprintf([pat,'''s have been extracted!\n']);
+        fprintf([pat,'s have been extracted!\n']);
         end
 end
 
@@ -267,9 +324,9 @@ end
 % checks we can implement here 
 
 if length(Hit) == length(EventSheet([2:end],24))
-    sprintf(('\n\nBecause the length of hits grabbed from the Event sheet, %d,\n accurately matches the length of hit events on the original Event Sheet,\n %d, \nIt seems like timestamps have been accurately parsed out! \nPress any key to continue'),length(Hit),length(EventSheet([2:end],24)))
+    sprintf(('SANITY CHECK:\n\nBecause the length of hits grabbed from the Event sheet, %d,\n accurately matches the length of hit events on the original Event Sheet,\n %d, \nIt seems like timestamps have been accurately parsed out! \nPress any key to continue'),length(Hit),length(EventSheet([2:end],24)))
 else 
-    sprintf(('\n The length of hits, %d, does not match the length of hit events on the original Event Sheet, %d, \nThere may be a problem with separating your event timestamps...\nPress any key and check back on your variables'),length(Hit),length(EventSheet([2:end],24)))
+    sprintf(('SANITY CHECK:\nThe length of hits, %d, does not match the length of hit events on the original Event Sheet, %d, \nThere may be a problem with separating your event timestamps...\nPress any key and check back on your variables'),length(Hit),length(EventSheet([2:end],24)))
 end
 pause
 
@@ -277,9 +334,9 @@ pause
 % we can do this also
 sanitycheckval = cell2mat(EventSheet(2,24));
 if (sanitycheckval) == Hit(1)
-    sprintf(('\n\nBecause your first extracted Hit event, %d, \nmatches the first hit event on the original Event Sheet, %d, \nIt seems like timestamps have been accurately parsed out! \nPress any key to continue...'),Hit(1),sanitycheckval)
+    sprintf(('SANITY CHECK:\n\nBecause your first extracted Hit event, %d, \nmatches the first hit event on the original Event Sheet, %d, \nIt seems like timestamps have been accurately parsed out! \nPress any key to continue...'),Hit(1),sanitycheckval)
 else 
-    sprintf(('Your first extracted hit event, %d, \ndoes not match the first event of the original timesheet, %d, \nThere may be a problem with separating your event timestamps...\nPress any key to continue but check back on your work'),Hit(1),sanitycheckval)
+    sprintf(('SANITY CHECK:\nYour first extracted hit event, %d, \ndoes not match the first event of the original timesheet, %d, \nThere may be a problem with separating your event timestamps...\nPress any key to continue but check back on your work'),Hit(1),sanitycheckval)
 end
 
 pause
@@ -302,8 +359,8 @@ savename. False_Alarm = False_Alarm(isnan(False_Alarm) == 0);
 savename. Chamber = cell2mat(chamber(2,3));
 
 % resave the structure to the correct folder
-cd(saveplace{1});
+cd(saveplace);
 save(mousename{1},'-struct', 'savename');
-sprintf('Your new structure has been saved with in path ''%s'', with name ''%s''',num2str(saveplace{1}),num2str(mousename{1}))
+sprintf('Your new structure has been saved with in path:\n''%s'', with name:\n ''%s''',num2str(saveplace),num2str(mousename{1}))
 end
 
