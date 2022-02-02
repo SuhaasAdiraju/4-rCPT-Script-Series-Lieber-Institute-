@@ -1,3 +1,64 @@
+%% Description
+% This script is companion/walkthrough/example for using createStrucNTsensors. At the end you will have a
+% structure of the mouse with the saved timestamps and neural activity data
+
+% --Written by Suhaas S Adiraju
+
+
+%% First things first...
+
+% The function we will be using here is called 'createStrucNTsensors'
+
+% You need to have the correct paths added for whatever you work on in
+% matlab so it knows where to source from 
+% This can be permanantly set, but for now, this method works smoothest
+    % path for the function used in this script
+functionpath = {'Z:\Circuits projects (CPT)\Working With BioSensor Transients'}
+addpath(functionpath{1});
+
+
+%% Identify Required Variables
+
+% Read the function description to understand the required inputs 
+        % open createStrucNTsensors
+
+%% Define Inputs
+clear;
+
+% Timestamps file information
+sprintf('\n\n Press any key to continue, when you do,\n A file selector will pop up,\n Then SELECT YOUR BEHAVIORAL TIMESTAMPS FILE ABET\nYOU WILL NEED TO CHANGE THE FILE TYPE TO ''ALL FILES''')
+pause
+[Tstamps_name, Tstamps_path] = uigetfile
+
+% Transients file information
+sprintf('\n\n Press any key to continue, when you do,\n A file selector will pop up,\n Then SELECT YOUR CALCIUM IMAGING TRANSIENTS FILE FROM INSCOPIX\nYOU WILL NEED TO CHANGE THE FILE TYPE TO ''ALL FILES''')
+pause
+[transients_name,transients_path] = uigetfile 
+
+% Mousename (custom name of structure)
+sprintf('\n\n Press any key to continue, when you do,\n A window will pop up,\n Then enter WHAT WOULD YOU LIKE TO NAME YOUR RESULTING STRUCTURE')
+pause
+prompt = {'Enter mousename, aka what you would like to name the output structure from this function?'}
+mousename = inputdlg(prompt)
+
+% Where would you like to save the resulting structure 
+sprintf('\n\n Press any key to continue, when you do,\n A file selector will pop up,\n Then select the the path to where you would like to save your new structure')
+pause
+saveplace = uigetdir
+
+% ROI of choice
+sprintf('\n\n Press any key to continue, when you do,\n A window will pop up,\n Then enter WHAT IS THE OPTIMAL ROI (SHOULD KNOW FROM INSCOPIX)')
+pause
+ROIPrompt = {'What ROI would you like to take?'}
+ROICell = inputdlg(ROIPrompt)
+ROI = str2num(ROICell{1});
+
+%% All Set! Run the Function
+sprintf('All necessary inputs recieved, running createStrucNTsensors!')
+createStrucNTsensors(Tstamps_path, Tstamps_name, transients_path, transients_name, ROI, saveplace, mousename);
+
+
+%% THE FUNCTION
 function [NTmouseStruc] = createStrucNTsensors(Tstamps_path, Tstamps_name, transients_path, transients_name, ROI, saveplace, mousename);
 %% Description
 % This function is for trimming, formatting, and combining neural activity
@@ -31,17 +92,17 @@ function [NTmouseStruc] = createStrucNTsensors(Tstamps_path, Tstamps_name, trans
 %% Reading in our main files
 
 % cd to your folder containing the event files (timestamps sheet)
-cd(Tstamps_path{1});
+cd(Tstamps_path);
 
 % read in the csv file
-[Tstamps,Titles,EventSheet] = xlsread(Tstamps_name{1});
+[Tstamps,Titles,EventSheet] = xlsread(Tstamps_name);
 
 % now cd to your imaging output folder (should be coming out of inscopix)
-cd(transients_path{1});
+cd(transients_path);
 
 
 % read in the csv file data 
-[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(transients_name{1});
+[Tstamps_transients,Titles_transients,EventSheet_transients] = xlsread(transients_name);
 
 % read in the transients matrix (in case xlsread is not working)
 % Ne_transients = readmatrix('1855_good_S3_TTL_Cell_Traces.csv',opts);
@@ -56,10 +117,8 @@ Transients = (Transients([2:end],[3:end]));
 % fit best, in this case the ROI 5 was most optimal in terms of transient
 % tracking, you should know what ROI you want from inscopix 
 
-% So lets only take the 5th row or ROI of interest
-ROIval = cell2mat(ROI);
 
-ROItransients = Transients(ROIval,:);
+ROItransients = Transients(ROI,:);
 
 
  % now we have our event sheet with corresponding timestamps that we wanna
@@ -299,12 +358,14 @@ savename. False_Alarm = False_Alarm(isnan(False_Alarm) == 0);
 savename. Chamber = cell2mat(chamber(2,3));
 
 %% resave the structure to the correct folder
-cd(saveplace{1});
+cd(saveplace);
 save(mousename{1},'-struct', 'savename');
 assignin("base", mousename{1}, savename);
 
-sprintf('Your new structure has been saved!\nPath: ''%s'',\nName: ''%s''\nAnd also exists in the workspace for immediate use...',saveplace{1},mousename{1})
+sprintf('Your new structure has been saved!\nPath: ''%s'',\nName: ''%s''\nAnd also exists in the workspace for immediate use...',saveplace,mousename{1})
 
 end
+
+
 
 
